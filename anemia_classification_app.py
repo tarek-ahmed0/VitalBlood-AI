@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
-# Apply Styles
 st.markdown(
     """
     <style>
@@ -15,7 +14,7 @@ st.markdown(
             font-family: 'Poppins', sans-serif;
             font-size: 2.5rem;
             font-weight: bold;
-            color: #ffffff;
+            color: #ffffff; /* White */
             display: flex;
             align-items: center;
             gap: 10px;
@@ -23,91 +22,129 @@ st.markdown(
         .header-subtitle {
             font-family: 'Poppins', sans-serif;
             font-size: 1.1rem;
-            color: #c40233;
+            color: #c40233; /* Light Violet */
         }
         .divider {
-            border-top: 1px solid #170225;
+            border-top: 1px solid #170225; /* Violet */
             margin: 20px 0;
         }
-        .result-box {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.2rem;
-            padding: 15px;
-            border-radius: 5px;
+        .solid-border {
+            border: 3px solid rgba(30, 10, 50);
+            border-radius: 3px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-color: rgba(23, 2, 37);
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        .animated-border {
+            background-color: rgba(255, 255, 255, 0);
+            padding: 20px;
+            border-radius: 3px;
+            border: 3px solid transparent;
+            border-image-slice: 1;
+            animation: gradient-border 3s infinite;
             text-align: center;
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
         }
-        .has-anemia {
-            background-color: #ffcccc;
-            color: #c40233;
-            border: 2px solid #c40233;
+        @keyframes gradient-border {
+            0% {
+                border-image-source: linear-gradient(90deg, #ff00ff, #00ffff);
+            }
+            50% {
+                border-image-source: linear-gradient(180deg, #00ffff, #ff00ff);
+            }
+            100% {
+                border-image-source: linear-gradient(270deg, #ff00ff, #00ffff);
+            }
         }
-        .no-anemia {
-            background-color: #ccffcc;
-            color: #006600;
-            border: 2px solid #006600;
+        .column-label {
+            font-family: 'Poppins', sans-serif;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #6C63FF;
+            margin-bottom: 10px;
+        }
+        .column-label2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+        .column-container {
+            margin-bottom: 20px;
         }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# Header Section
+# Header section
 st.markdown(
     """
-    <div class="header-title">VitalBlood AI. 🩸</div>
-    <div class="header-subtitle">Smart anemia detection through advanced blood analysis.</div>
+    <div class="header-title">
+        VitalBlood AI. 🩸
+    </div>
+    <div class="header-subtitle">
+        Smart anemia detection through advanced blood analysis.
+    </div>
     <div class="divider"></div>
     """,
     unsafe_allow_html=True
 )
 
-# Load Model & Scaler with Error Handling
+# Load the model with compatibility fixes
 try:
     with open("anemia_model.pkl", "rb") as f:
-        model = pickle.load(f)
-except FileNotFoundError:
-    st.error("🚨 Model file 'anemia_model.pkl' not found! Please upload the correct model file.")
+        model = pickle.load(f, encoding="latin1")  # Fix for compatibility
+
+    # Remove `monotonic_cst` attribute if it exists (fix for new sklearn versions)
+    if hasattr(model, 'monotonic_cst'):
+        del model.monotonic_cst
+
+except Exception as e:
+    st.error(f"Error loading model: {e}")
     st.stop()
 
+# Load scaler
 try:
     with open("scaler.pkl", "rb") as f:
         scaler = pickle.load(f)
-except FileNotFoundError:
-    st.error("🚨 Scaler file 'scaler.pkl' not found! Please upload the correct scaler file.")
+except Exception as e:
+    st.error(f"Error loading scaler: {e}")
     st.stop()
 
-# Define Features
+# Define input features
 feature_names = ["HB", "RBC", "PCV", "MCH", "MCHC"]
 inputs = []
 
-# Collect User Input
 for feature in feature_names:
     value = st.number_input(f"{feature}", min_value=0.0, format="%.2f")
     inputs.append(value)
 
-# Convert Inputs to NumPy Array
 input_array = np.array(inputs).reshape(1, -1)
 
-# Check for Missing Values
-if np.isnan(input_array).any():
-    st.warning("⚠️ Please fill in all values before predicting.")
-else:
-    # Scale the input
-    try:
-        input_scaled = scaler.transform(input_array)
-    except ValueError as e:
-        st.error(f"⚠️ Input scaling error: {e}")
-        st.stop()
+# Check if inputs are valid before scaling
+if np.any(np.isnan(input_array)):
+    st.warning("Please enter valid values for all fields.")
 
-    # Prediction Button
-    if st.button("🔍 Predict Anemia"):
+else:
+    input_scaled = scaler.transform(input_array)
+
+    # Display result messages
+    has_anemia = '<div class="result-box has-anemia">🚨 Has Anemia: High likelihood of anemia detected. Please consult a doctor. </div>'
+    no_anemia = '<div class="result-box no-anemia">✅ No Anemia: No signs of anemia detected. Stay healthy! </div>'
+
+    if st.button("Predict Anemia"):
         try:
             prediction = model.predict(input_scaled)
-            result_html = (
-                '<div class="result-box no-anemia">✅ No Anemia: No signs of anemia detected. Stay healthy! </div>'
-                if prediction[0] == 0
-                else '<div class="result-box has-anemia">🚨 Has Anemia: High likelihood of anemia detected. Please consult a doctor. </div>'
-            )
-            st.markdown(result_html, unsafe_allow_html=True)
+            result = no_anemia if prediction[0] == 0 else has_anemia
+            st.markdown(result, unsafe_allow_html=True)
         except Exception as e:
-            st.error(f"🚨 Prediction error: {e}")
+            st.error(f"Prediction error: {e}")
