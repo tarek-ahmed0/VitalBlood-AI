@@ -115,28 +115,26 @@ st.markdown(
 )
 
 
-with open(r"anemia_model.pkl", "rb") as model:
-    model = pickle.load(model) 
+with open("anemia_model.pkl", "rb") as f:
+    model = pickle.load(f)
+
+with open("scaler.pkl", "rb") as scaler:
+    scaler = pickle.load(scaler)
 
 feature_names = ["HB", "RBC", "PCV", "MCH", "MCHC"]
-
-scaler = StandardScaler()
-
-
 inputs = []
+
 for feature in feature_names:
     value = st.number_input(f"{feature}", min_value=0.0, format="%.2f")
     inputs.append(value)
 
 input_array = np.array(inputs).reshape(1, -1)
-input_scaled = scaler.fit_transform(input_array)
+input_scaled = scaler.transform(input_array)
 
-has_anemia = """:red[Has Anemia] 🚨
-:gray[The analysis indicates a high likelihood of anemia. Please consult a healthcare professional for further evaluation.]"""
-no_anemia = """No Anemia 🧬
-:gray[No signs of anemia detected. Maintain a balanced diet and regular check-ups for optimal health.]"""
+has_anemia = '<div class="result-box has-anemia">🚨 Has Anemia: High likelihood of anemia detected. Please consult a doctor. </div>'
+no_anemia = '<div class="result-box no-anemia">✅ No Anemia: No signs of anemia detected. Stay healthy! </div>'
 
 if st.button("Predict Anemia"):
     prediction = model.predict(input_scaled)
     result = no_anemia if prediction[0] == 0 else has_anemia
-    st.subheader(result)
+    st.markdown(result, unsafe_allow_html=True)
