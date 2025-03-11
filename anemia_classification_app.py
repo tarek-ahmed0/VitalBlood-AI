@@ -124,7 +124,7 @@ feature_names = ["HB", "RBC", "PCV", "MCH", "MCHC"]
 inputs = []
 
 for feature in feature_names:
-    value = st.number_input(f"{feature}", min_value=0.0, format="%.2f")
+    value = st.number_input(f"red:[{feature}]", min_value=0.0, format="%.2f")
     inputs.append(value)
 
 input_array = np.array(inputs).reshape(1, -1)
