@@ -85,7 +85,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Header section
+
 st.markdown(
     """
     <div class="header-title">
@@ -99,12 +99,11 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Load the model with compatibility fixes
+
 try:
     with open("anemia_model.pkl", "rb") as f:
-        model = pickle.load(f, encoding="latin1")  # Fix for compatibility
-
-    # Remove `monotonic_cst` attribute if it exists (fix for new sklearn versions)
+        model = pickle.load(f, encoding="latin1")  
+    
     if hasattr(model, 'monotonic_cst'):
         del model.monotonic_cst
 
@@ -120,7 +119,7 @@ except Exception as e:
     st.error(f"Error loading scaler: {e}")
     st.stop()
 
-# Define input features
+
 feature_names = ["HB", "RBC", "PCV", "MCH", "MCHC"]
 inputs = []
 
@@ -130,16 +129,17 @@ for feature in feature_names:
 
 input_array = np.array(inputs).reshape(1, -1)
 
-# Check if inputs are valid before scaling
+
 if np.any(np.isnan(input_array)):
     st.warning("Please enter valid values for all fields.")
 
 else:
     input_scaled = scaler.transform(input_array)
 
-    # Display result messages
-    has_anemia = '<div class="result-box has-anemia">🚨 Has Anemia: High likelihood of anemia detected. Please consult a doctor. </div>'
-    no_anemia = '<div class="result-box no-anemia">✅ No Anemia: No signs of anemia detected. Stay healthy! </div>'
+    has_anemia = """:red[Has Anemia] 🚨
+    :gray[High likelihood of anemia. Please consult a doctor.]"""
+    no_anemia = """No Anemia 🧬
+    :gray[No signs of anemia detected. Stay healthy!]"""
 
     if st.button("Predict Anemia"):
         try:
