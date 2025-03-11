@@ -89,7 +89,7 @@ st.markdown(
 st.markdown(
     """
     <div class="header-title">
-        VitalBlood AI. 🩸
+        VitalBlood 🩸
     </div>
     <div class="header-subtitle">
         Smart anemia detection through advanced blood analysis.
