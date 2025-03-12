@@ -14,7 +14,7 @@ st.markdown(
             font-family: 'Poppins', sans-serif;
             font-size: 2.5rem;
             font-weight: bold;
-            color: #ffffff; /* White */
+            color: #ffffff;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -22,59 +22,17 @@ st.markdown(
         .header-subtitle {
             font-family: 'Poppins', sans-serif;
             font-size: 1.1rem;
-            color: #c40233; /* Light Violet */
+            color: #c40233;
         }
         .divider {
-            border-top: 1px solid #170225; /* Violet */
+            border-top: 1px solid #170225;
             margin: 20px 0;
-        }
-        .solid-border {
-            border: 3px solid rgba(30, 10, 50);
-            border-radius: 3px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            background-color: rgba(23, 2, 37);
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-        }
-        .animated-border {
-            background-color: rgba(255, 255, 255, 0);
-            padding: 20px;
-            border-radius: 3px;
-            border: 3px solid transparent;
-            border-image-slice: 1;
-            animation: gradient-border 3s infinite;
-            text-align: center;
-            box-sizing: border-box;
-            width: 100%;
-            height: 100%;
-        }
-        @keyframes gradient-border {
-            0% {
-                border-image-source: linear-gradient(90deg, #ff00ff, #00ffff);
-            }
-            50% {
-                border-image-source: linear-gradient(180deg, #00ffff, #ff00ff);
-            }
-            100% {
-                border-image-source: linear-gradient(270deg, #ff00ff, #00ffff);
-            }
         }
         .column-label {
             font-family: 'Poppins', sans-serif;
             font-weight: bold;
             font-size: 1.1rem;
             color: #6C63FF;
-            margin-bottom: 10px;
-        }
-        .column-label2 {
-            font-family: 'Poppins', sans-serif;
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #ffffff;
             margin-bottom: 10px;
         }
         .column-container {
@@ -84,7 +42,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 
 st.markdown(
     """
@@ -99,14 +56,11 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 try:
     with open("anemia_model.pkl", "rb") as f:
-        model = pickle.load(f, encoding="latin1")  
-    
+        model = pickle.load(f, encoding="latin1")
     if hasattr(model, 'monotonic_cst'):
         del model.monotonic_cst
-
 except Exception as e:
     st.error(f"Error loading model: {e}")
     st.stop()
@@ -119,27 +73,35 @@ except Exception as e:
     st.error(f"Error loading scaler: {e}")
     st.stop()
 
+# Feature descriptions and normal ranges
+feature_info = {
+    "HB": {"desc": "Hemoglobin carries oxygen in the blood.", "range": "(Men: 13.8-17.2 g/dL, Women: 12.1-15.1 g/dL)"},
+    "RBC": {"desc": "Red blood cells transport oxygen throughout the body.", "range": "(Men: 4.7-6.1 million/μL, Women: 4.2-5.4 million/μL)"},
+    "PCV": {"desc": "Packed cell volume measures the proportion of red blood cells.", "range": "(Men: 40.7-50.3%, Women: 36.1-44.3%)"},
+    "MCH": {"desc": "Mean corpuscular hemoglobin is the average amount of hemoglobin per red blood cell.", "range": "(27-33 pg/cell)"},
+    "MCHC": {"desc": "Mean corpuscular hemoglobin concentration indicates hemoglobin concentration per red cell volume.", "range": "(32-36 g/dL)"}
+}
 
-feature_names = ["HB", "RBC", "PCV", "MCH", "MCHC"]
 inputs = []
 
-for feature in feature_names:
-    value = st.number_input(f":green[{feature}]", min_value=0.0, format="%.2f")
+for feature, details in feature_info.items():
+    st.markdown(f"### {feature}")
+    st.markdown(f"{details['desc']}")
+    st.markdown(f"**Normal Range:** {details['range']}")
+    value = st.number_input(f"Enter your {feature}:", min_value=0.0, format="%.2f")
     inputs.append(value)
 
 input_array = np.array(inputs).reshape(1, -1)
 
-
 if np.any(np.isnan(input_array)):
     st.warning("Please enter valid values for all fields.")
-
 else:
     input_scaled = scaler.transform(input_array)
 
-    has_anemia = """:red[Has Anemia] 🚨
-    :gray[High likelihood of anemia. Please consult a doctor.]"""
-    no_anemia = """No Anemia 🧬
-    :gray[No signs of anemia detected. Stay healthy!]"""
+    has_anemia = """🚨 **Has Anemia**  
+    _High likelihood of anemia. Please consult a doctor._"""
+    no_anemia = """🩺 **No Anemia**  
+    _No signs of anemia detected. Stay healthy!_"""
 
     if st.button("Predict Anemia"):
         try:
