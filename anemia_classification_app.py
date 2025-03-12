@@ -42,8 +42,8 @@ st.markdown(
         }
         .metric-range {
             font-family: 'Poppins', sans-serif;
-            font-size: 0.7rem;
-            color: #999999;
+            font-size: 0.8rem;
+            color: #4CAF50; /* Green */
             margin-bottom: 5px;
         }
     </style>
@@ -83,11 +83,11 @@ except Exception as e:
 
 # Feature descriptions and normal ranges
 feature_info = {
-    "HB": {"desc": "Oxygen-carrying protein.", "range": "(M: 13.8-17.2, W: 12.1-15.1 g/dL)"},
-    "RBC": {"desc": "Oxygen transport cells.", "range": "(M: 4.7-6.1, W: 4.2-5.4 M/μL)"},
-    "PCV": {"desc": "Blood cell percentage.", "range": "(M: 40.7-50.3%, W: 36.1-44.3%)"},
-    "MCH": {"desc": "Hemoglobin per cell.", "range": "(27-33 pg/cell)"},
-    "MCHC": {"desc": "Hemoglobin concentration.", "range": "(32-36 g/dL)"}
+    "HB": {"desc": "Oxygen-carrying protein.", "range": "( 13-17 g/dL )"},
+    "RBC": {"desc": "Oxygen transport cells.", "range": "( 4.2-6.1 M/μL )"},
+    "PCV": {"desc": "Blood cell percentage.", "range": "( 36-50% )"},
+    "MCH": {"desc": "Hemoglobin per cell.", "range": "( 27-33 pg )"},
+    "MCHC": {"desc": "Hemoglobin concentration.", "range": "( 32-36 g/dL )"}
 }
 
 inputs = []
@@ -96,7 +96,7 @@ for feature, details in feature_info.items():
     st.markdown(f"<div class='metric-title'>{feature}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='metric-desc'>{details['desc']}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='metric-range'>{details['range']}</div>", unsafe_allow_html=True)
-    value = st.number_input("", min_value=0.0, format="%.2f", key=feature)  # Removed metric label
+    value = st.number_input("", min_value=0.0, format="%.2f", key=feature)  # No label, just number input
     inputs.append(value)
 
 input_array = np.array(inputs).reshape(1, -1)
