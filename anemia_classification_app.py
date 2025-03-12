@@ -7,12 +7,11 @@ from sklearn.preprocessing import StandardScaler
 st.markdown(
     """
     <style>
-        /* Import Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
         .header-title {
             font-family: 'Poppins', sans-serif;
-            font-size: 2.5rem;
+            font-size: 2rem; /* Slightly smaller */
             font-weight: bold;
             color: #ffffff;
             display: flex;
@@ -21,22 +20,31 @@ st.markdown(
         }
         .header-subtitle {
             font-family: 'Poppins', sans-serif;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #c40233;
         }
         .divider {
             border-top: 1px solid #170225;
-            margin: 20px 0;
+            margin: 15px 0;
         }
-        .column-label {
+        .metric-title {
             font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
             font-weight: bold;
-            font-size: 1.1rem;
-            color: #6C63FF;
-            margin-bottom: 10px;
+            color: #ffffff;
+            margin-bottom: 3px;
         }
-        .column-container {
-            margin-bottom: 20px;
+        .metric-desc {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.8rem;
+            color: #bbbbbb;
+            margin-bottom: 2px;
+        }
+        .metric-range {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.7rem;
+            color: #999999;
+            margin-bottom: 5px;
         }
     </style>
     """,
@@ -49,7 +57,7 @@ st.markdown(
         VitalBlood 🩸
     </div>
     <div class="header-subtitle">
-        Smart anemia detection through advanced blood analysis.
+        Smart anemia detection through blood analysis.
     </div>
     <div class="divider"></div>
     """,
@@ -75,20 +83,20 @@ except Exception as e:
 
 # Feature descriptions and normal ranges
 feature_info = {
-    "HB": {"desc": "Hemoglobin carries oxygen in the blood.", "range": "(Men: 13.8-17.2 g/dL, Women: 12.1-15.1 g/dL)"},
-    "RBC": {"desc": "Red blood cells transport oxygen throughout the body.", "range": "(Men: 4.7-6.1 million/μL, Women: 4.2-5.4 million/μL)"},
-    "PCV": {"desc": "Packed cell volume measures the proportion of red blood cells.", "range": "(Men: 40.7-50.3%, Women: 36.1-44.3%)"},
-    "MCH": {"desc": "Mean corpuscular hemoglobin is the average amount of hemoglobin per red blood cell.", "range": "(27-33 pg/cell)"},
-    "MCHC": {"desc": "Mean corpuscular hemoglobin concentration indicates hemoglobin concentration per red cell volume.", "range": "(32-36 g/dL)"}
+    "HB": {"desc": "Oxygen-carrying protein.", "range": "(M: 13.8-17.2, W: 12.1-15.1 g/dL)"},
+    "RBC": {"desc": "Oxygen transport cells.", "range": "(M: 4.7-6.1, W: 4.2-5.4 M/μL)"},
+    "PCV": {"desc": "Blood cell percentage.", "range": "(M: 40.7-50.3%, W: 36.1-44.3%)"},
+    "MCH": {"desc": "Hemoglobin per cell.", "range": "(27-33 pg/cell)"},
+    "MCHC": {"desc": "Hemoglobin concentration.", "range": "(32-36 g/dL)"}
 }
 
 inputs = []
 
 for feature, details in feature_info.items():
-    st.markdown(f"### {feature}")
-    st.markdown(f"{details['desc']}")
-    st.markdown(f"**Normal Range:** {details['range']}")
-    value = st.number_input(f"Enter your {feature}:", min_value=0.0, format="%.2f")
+    st.markdown(f"<div class='metric-title'>{feature}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='metric-desc'>{details['desc']}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='metric-range'>{details['range']}</div>", unsafe_allow_html=True)
+    value = st.number_input("", min_value=0.0, format="%.2f", key=feature)  # Removed metric label
     inputs.append(value)
 
 input_array = np.array(inputs).reshape(1, -1)
